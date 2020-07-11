@@ -1,0 +1,96 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{.Release.Name}}"
+  labels:
+    app.kubernetes.io/managed-by: {{.Release.Service | quote }}
+    app.kubernetes.io/instance: {{.Release.Name | quote }}
+    helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: "{{.Release.Name}}"
+      labels:
+        app.kubernetes.io/managed-by: {{.Release.Service | quote }}
+        app.kubernetes.io/instance: {{.Release.Name | quote }}
+        helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: post-install-job
+        image: "mcr.microsoft.com/mssql/server:2017-latest-ubuntu"
+        env:
+            {{- $root := . }}
+            {{- range $ref, $values := .Values.secrets }}
+            {{- range $key, $value := $values }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "otuslab.fullname" $root }}-{{ $ref | lower }}
+                  key: {{ $key }}
+            {{- end }}
+            {{- end }}
+        command:
+          - sh
+          - "-c"
+          - |
+            /opt/mssql-tools/bin/sqlcmd -S myapp-mssql-linux -U sa -P $SA_PASSWORD <<'EOF'
+            USE master;
+            GO
+            CREATE DATABASE otusdb_registry;
+            GO
+            USE otusdb_registry;
+            GO
+            CREATE TABLE [IdentityDocs] (
+                [Id] INT NOT NULL IDENTITY(1, 1),
+                [DocType] INT NOT NULL,
+                [Serie] NVARCHAR(10) NOT NULL,
+                [Number] NVARCHAR(10) NOT NULL,
+                [IssueDate] DATETIME NULL,
+                [IssuedBy] NVARCHAR(150) NULL,
+                CONSTRAINT [PK_IdentityDocs] 
+                    PRIMARY KEY CLUSTERED ([Id])
+            );
+            GO
+            CREATE TABLE [dbo].[PersonCards] (
+                [Id] INT IDENTITY(1,1) NOT NULL,
+                [LastName] NVARCHAR(30) NOT NULL,
+                [FirstName] NVARCHAR(30) NOT NULL,
+                [MiddleName] NVARCHAR(30) NOT NULL,
+                [BirthDate] DATETIME NOT NULL,
+                [Gender] INT NOT NULL,
+                [IdentityDocId] INT NOT NULL,
+                [RegAddress] NVARCHAR(200) NOT NULL,
+                [FactAddress] NVARCHAR(200) NULL,
+                [Phone] NVARCHAR(40) NULL,
+                [IsDeleted] BIT NOT NULL,
+                [CreateDate] DATETIME NOT NULL,
+                [CreateUserId] INT NOT NULL,
+                [LastModifiedDate] DATETIME NULL,
+                [LastModifiedUserId] INT NULL,
+                CONSTRAINT [PK_PersonCards] 
+                    PRIMARY KEY CLUSTERED ([Id]),
+                CONSTRAINT [FK_PersonCards_IdentityDocs_Id] 
+                    FOREIGN KEY([IdentityDocId])
+                    REFERENCES [dbo].[IdentityDocs]([Id])
+            );
+            GO
+            CREATE TABLE [dbo].[IdempotencyKeys] (
+                [PersonCardId] INT NOT NULL,
+                [Key] UNIQUEIDENTIFIER NOT NULL,
+                [CreateDate] DATETIME NOT NULL,
+                CONSTRAINT [PK_IdempotencyKeys]
+                    PRIMARY KEY CLUSTERED ([PersonCardId]),
+                CONSTRAINT [FK_IdempotencyKeys_PersonCards_Id]
+                    FOREIGN KEY([PersonCardId])
+                    REFERENCES [dbo].[PersonCards]([Id])
+            );
+            GO
+            EOF
+  backoffLimit: 5

@@ -1,0 +1,114 @@
+{
+	"id": "52a2953d-e4b5-47c5-8e1d-6177b639ce92",
+	"name": "Registration",
+	"description": "",
+	"auth": null,
+	"events": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "a06a4834-83b4-4d7f-8115-d1701e8cf42c",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "383be291-d5b5-469c-998a-8367013255ac",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variables": [
+		{
+			"key": "baseUrl",
+			"value": "arch.homework",
+			"disabled": false
+		}
+	],
+	"order": [
+		"367d4314-5179-4ae9-b661-23e908dc17e3",
+		"9240b450-4e1a-475a-86f6-5a1875d271e4",
+		"4745f7ab-86c5-488f-ba19-181eec3522a4"
+	],
+	"folders_order": [],
+	"protocolProfileBehavior": {},
+	"folders": [],
+	"requests": [
+		{
+			"id": "367d4314-5179-4ae9-b661-23e908dc17e3",
+			"name": "Создание карты пациента",
+			"url": "http://{{baseUrl}}/api/PersonCard",
+			"description": "",
+			"data": [],
+			"dataOptions": {
+				"raw": {
+					"language": "json"
+				}
+			},
+			"dataMode": "raw",
+			"headerData": [],
+			"method": "POST",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": null,
+			"rawModeData": "{\"LastName\":\"Иванов\",\"FirstName\":\"Иван\",\"MiddleName\":\"Иванович\",\"BirthDate\":\"1980-01-01\",\"Gender\":1, \"RegAddress\":\"г.Москва, ул.Солнечная, д.1\", \"IdentityDoc\":{\"DocType\":1, \"Serie\":\"4856\", \"Number\":\"394856\"}, \"IdempotencyKey\":\"DD6F59C9-6A53-42D6-8ADD-76E44F746153\"}",
+			"headers": "",
+			"pathVariables": {}
+		},
+		{
+			"id": "4745f7ab-86c5-488f-ba19-181eec3522a4",
+			"name": "Создание карты пациента с другим ключем идемпотентности Copy",
+			"url": "http://{{baseUrl}}/api/PersonCard",
+			"description": "",
+			"data": [],
+			"dataOptions": {
+				"raw": {
+					"language": "json"
+				}
+			},
+			"dataMode": "raw",
+			"headerData": [],
+			"method": "POST",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": null,
+			"rawModeData": "{\"LastName\":\"Иванов\",\"FirstName\":\"Иван\",\"MiddleName\":\"Иванович\",\"BirthDate\":\"1980-01-01\",\"Gender\":1, \"RegAddress\":\"г.Москва, ул.Солнечная, д.1\", \"IdentityDoc\":{\"DocType\":1, \"Serie\":\"4856\", \"Number\":\"394856\"}, \"IdempotencyKey\":\"776F59C9-6A53-42D6-8ADD-76E44F746153\"}",
+			"headers": "",
+			"pathVariables": {}
+		},
+		{
+			"id": "9240b450-4e1a-475a-86f6-5a1875d271e4",
+			"name": "Создание карты пациента с тем же ключем идемпотентности",
+			"url": "http://{{baseUrl}}/api/PersonCard",
+			"description": "",
+			"data": [],
+			"dataOptions": {
+				"raw": {
+					"language": "json"
+				}
+			},
+			"dataMode": "raw",
+			"headerData": [],
+			"method": "POST",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": null,
+			"rawModeData": "{\"LastName\":\"Иванов\",\"FirstName\":\"Иван\",\"MiddleName\":\"Иванович\",\"BirthDate\":\"1980-01-01\",\"Gender\":1, \"RegAddress\":\"г.Москва, ул.Солнечная, д.1\", \"IdentityDoc\":{\"DocType\":1, \"Serie\":\"4856\", \"Number\":\"394856\"}, \"IdempotencyKey\":\"DD6F59C9-6A53-42D6-8ADD-76E44F746153\"}",
+			"headers": "",
+			"pathVariables": {}
+		}
+	]
+}
